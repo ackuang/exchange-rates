@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Rates</title>
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Exchange Rates</h1>
+        <div class="mb-3 row justify-content-center">
+            <label for="date-picker" class="col-sm-2 col-form-label text-end">Select Date:</label>
+            <div class="col-sm-4">
+                <input type="date" id="date-picker" class="form-control" />
+            </div>
+        </div>
+        <table id="exchange-rates" class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Base Currency</th>
+                    <th>Target Currency</th>
+                    <th>Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const datePicker = document.getElementById('date-picker');
+            const ratesTableBody = document.querySelector('#exchange-rates tbody');
+
+            const fetchRates = async (date = null) => {
+                const endpoint = date ? `/rates.php?date=${date}` : '/rates.php';
+                try {
+                    const response = await fetch(endpoint);
+                    const data = await response.json();
+
+                    ratesTableBody.innerHTML = '';
+                    data.rates.forEach(rate => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${rate.base_currency}</td>
+                            <td>${rate.target_currency}</td>
+                            <td>${parseFloat(rate.rate).toFixed(2)}</td>
+                        `;
+                        ratesTableBody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error fetching exchange rates:', error);
+                }
+            };
+
+            datePicker.addEventListener('change', (event) => {
+                const selectedDate = event.target.value;
+                fetchRates(selectedDate);
+            });
+
+            fetchRates();
+        });
+    </script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
